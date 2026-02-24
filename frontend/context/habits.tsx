@@ -1,53 +1,79 @@
-import { createContext, useState, useContext } from "react";
-import { Alert } from "react-native";
+// habits.tsx
+import { createContext, useContext, useEffect, useState } from "react";
+import {
+  apiGetHabits,
+  apiCreateHabit,
+  apiDeleteHabit,
+  apiTrackHabit,
+  Habit,
+  CreateHabitPayload,
+} from "@/api/api";
 
-type Habit = {
-  id: number;
-  habitName: string;
-  habitDescription: string;
-  frequency: number;
-  done?: boolean;
+type HabitsContextType = {
+  habits: Habit[];
+  addHabit: (
+    habit: CreateHabitPayload | (CreateHabitPayload & { id?: number }),
+  ) => Promise<void>;
+  toggleHabitDone: (id: number, value: boolean) => Promise<void>;
+  deleteHabit: (id: number) => Promise<void>;
 };
 
-const HabitsContext = createContext({
-  habits: [] as Habit[],
-  addHabit: (_newHabit: Habit) => {},
-  toggleHabitDone: (_id: number, _value: boolean) => {},
-  deleteHabit: (_id: number) => {},
-});
+const HabitsContext = createContext<HabitsContextType | null>(null);
 
 export const HabitsProvider = ({ children }: { children: React.ReactNode }) => {
   const [habits, setHabits] = useState<Habit[]>([]);
 
-  const addHabit = (newHabit: Habit) => {
-    setHabits((prev) => [...prev, newHabit]);
+  const refresh = async () => {
+    try {
+      const data = await apiGetHabits();
+      console.log("Fetched habits:", data);
+      setHabits(data);
+    } catch (e: any) {
+      console.error(
+        "FETCH HABITS FAILED:",
+        e?.response?.data ?? e?.message ?? e,
+      );
+      console.error("Make sure backend is running at the correct URL");
+    }
   };
 
-  const toggleHabitDone = (id: number, value: boolean) => {
+  useEffect(() => {
+    refresh();
+  }, []);
+
+  const addHabit = async (habit: any) => {
+    try {
+      const saved = await apiCreateHabit(habit);
+      setHabits((prev) => [...prev, saved]);
+    } catch (e: any) {
+      console.log("CREATE FAILED:", e?.response?.data ?? e?.message ?? e);
+    }
+  };
+
+  const toggleHabitDone = async (id: number, value: boolean) => {
+    // optimistic UI
     setHabits((prev) =>
-      prev.map((h) => {
-        if (h.id !== id) return h;
-
-        const newFrequency = value ? Math.max(h.frequency - 1, 0) : h.frequency;
-
-        if (newFrequency === 0 && h.frequency !== 0) {
-          Alert.alert(
-            "Congratulations!",
-            "You've achieved your goal for this habit!",
-          );
-        }
-
-        return {
-          ...h,
-          done: value,
-          frequency: newFrequency,
-        };
-      }),
+      prev.map((h) => (h.id === id ? { ...h, done: value } : h)),
     );
+
+    try {
+      const updated = await apiTrackHabit(id, value);
+      setHabits((prev) => prev.map((h) => (h.id === id ? updated : h)));
+    } catch (e: any) {
+      console.log("TRACK FAILED:", e?.response?.data ?? e?.message ?? e);
+      await refresh(); // rollback to server truth
+    }
   };
-  const deleteHabit = (id: number) => {
-    setHabits((prev) => prev.filter((h) => h.id !== id));
+
+  const deleteHabit = async (id: number) => {
+    try {
+      await apiDeleteHabit(id);
+      setHabits((prev) => prev.filter((h) => h.id !== id));
+    } catch (e: any) {
+      console.log("DELETE FAILED:", e?.response?.data ?? e?.message ?? e);
+    }
   };
+
   return (
     <HabitsContext.Provider
       value={{ habits, addHabit, toggleHabitDone, deleteHabit }}
@@ -57,4 +83,8 @@ export const HabitsProvider = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-export const useHabits = () => useContext(HabitsContext);
+export const useHabits = () => {
+  const ctx = useContext(HabitsContext);
+  if (!ctx) throw new Error("useHabits must be used inside HabitsProvider");
+  return ctx;
+};
