@@ -1,10 +1,11 @@
 from django.shortcuts import render
 from django.http import HttpResponse
+from django.views import View
 from .models import Habit
 from django.views.decorators.csrf import csrf_exempt
 
-class HabitViewSet:
-    def create(self, request):
+class Habit(View):
+    def post(self, request):
         name = request.POST.get("name")
         description = request.POST.get("description", "")
         remaining = int(request.POST.get("remaining", 0))
@@ -19,7 +20,7 @@ class HabitViewSet:
         except Habit.DoesNotExist:
             return HttpResponse(status=404)
         
-    def update(self, request, habit_id):
+    def put(self, request, habit_id):
         try:
             habit = Habit.objects.get(id=habit_id)
             habit.name = request.POST.get("name", habit.name)
