@@ -87,6 +87,24 @@ export const apiTrackHabit = async (id: number, done: boolean): Promise<Habit> =
   return normalizeHabit(res.data);
 };
 
+// UPDATE habit
+export const apiUpdateHabit = async (id: number, payload: CreateHabitPayload): Promise<Habit> => {
+  const frequency = toInt(payload.frequency);
+  if (!Number.isFinite(frequency)) {
+    throw new Error("frequency must be a valid number");
+  }
+
+  const send: CreateHabitPayload = {
+    habitName: String(payload.habitName ?? "").trim(),
+    habitDescription: String(payload.habitDescription ?? "").trim(),
+    frequency,
+    done: Boolean(payload.done ?? false),
+  };
+
+  const res = await api.put<any>(`${HABITS_PATH}${id}/`, send);
+  return normalizeHabit(res.data);
+};
+
 // DELETE habit
 export const apiDeleteHabit = async (id: number): Promise<void> => {
   await api.delete(`${HABITS_PATH}${id}/`);

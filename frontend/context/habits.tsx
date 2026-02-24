@@ -3,6 +3,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import {
   apiGetHabits,
   apiCreateHabit,
+  apiUpdateHabit,
   apiDeleteHabit,
   apiTrackHabit,
   Habit,
@@ -14,6 +15,7 @@ type HabitsContextType = {
   addHabit: (
     habit: CreateHabitPayload | (CreateHabitPayload & { id?: number }),
   ) => Promise<void>;
+  updateHabit: (id: number, habit: CreateHabitPayload) => Promise<void>;
   toggleHabitDone: (id: number, value: boolean) => Promise<void>;
   deleteHabit: (id: number) => Promise<void>;
 };
@@ -50,6 +52,16 @@ export const HabitsProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const updateHabit = async (id: number, habit: CreateHabitPayload) => {
+    try {
+      const updated = await apiUpdateHabit(id, habit);
+      setHabits((prev) => prev.map((h) => (h.id === id ? updated : h)));
+    } catch (e: any) {
+      console.log("UPDATE FAILED:", e?.response?.data ?? e?.message ?? e);
+      await refresh(); // rollback to server truth
+    }
+  };
+
   const toggleHabitDone = async (id: number, value: boolean) => {
     // optimistic UI
     setHabits((prev) =>
@@ -76,7 +88,7 @@ export const HabitsProvider = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <HabitsContext.Provider
-      value={{ habits, addHabit, toggleHabitDone, deleteHabit }}
+      value={{ habits, addHabit, updateHabit, toggleHabitDone, deleteHabit }}
     >
       {children}
     </HabitsContext.Provider>

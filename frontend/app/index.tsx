@@ -68,6 +68,12 @@ export default function App() {
                     onValueChange={(value) => toggleHabitDone(habit.id, value)}
                   />
                   <Pressable
+                    style={styles.editButton}
+                    onPress={() => router.push(`/edit_habits?id=${habit.id}`)}
+                  >
+                    <Text style={styles.editText}>Edit</Text>
+                  </Pressable>
+                  <Pressable
                     style={styles.deleteButton}
                     onPress={() => deleteHabit(habit.id)}
                   >
@@ -174,6 +180,18 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   deleteText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "bold",
+  },
+  editButton: {
+    marginTop: 10,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    backgroundColor: "#4d9fff",
+    borderRadius: 5,
+  },
+  editText: {
     color: "#fff",
     fontSize: 14,
     fontWeight: "bold",
