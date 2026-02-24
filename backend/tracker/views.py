@@ -42,5 +42,5 @@ class HabitViewSet(ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         habit = self.get_object()
         habit.delete()
-        return Response(status=status.HTTP_200_OK)
+        return Response({"message": "Habit deleted successfully"}, status=status.HTTP_200_OK)
     
