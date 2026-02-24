@@ -55,7 +55,7 @@ class TrackerViewSet(ModelViewSet):
     queryset = Habit.objects.all()
     serializer_class = HabitSerializer
 
-    def partial_update(self, request, *args, **kwargs):  # CHANGE 2: handle PATCH
+    def partial_update(self, request, *args, **kwargs):
         habit = self.get_object()
         today = timezone.now().date()
 
@@ -63,9 +63,11 @@ class TrackerViewSet(ModelViewSet):
         serializer.is_valid(raise_exception=True)
         progress = serializer.validated_data.get("done", habit.done)
 
-        if progress and habit.frequency > 0 and habit.last_updated != today:
-            habit.frequency -= 1
-            habit.last_updated = today
+
+        if progress and habit.frequency > 0:
+            if not habit.done or habit.last_updated != today:
+                habit.frequency -= 1
+                habit.last_updated = today
 
         serializer.save(frequency=habit.frequency, last_updated=habit.last_updated)
         return Response(serializer.data)
