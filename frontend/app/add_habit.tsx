@@ -17,24 +17,33 @@ const AddHabit = () => {
   const [habitDescription, setHabitDescription] = useState("");
   const [frequency, setFrequency] = useState("");
 
-  const handleSubmit = () => {
-    if (habitName === "" || habitDescription === "") {
+  const handleSubmit = async () => {
+    if (habitName === "" || habitDescription === "" || frequency === "") {
       alert("Please fill in all fields");
       return;
     }
 
+    const frequencyNum = parseInt(frequency, 10);
+    if (isNaN(frequencyNum) || frequencyNum <= 0) {
+      alert("Please enter a valid number of days greater than 0");
+      return;
+    }
+
     const newHabit = {
-      id: habits.length + 1,
       habitName,
       habitDescription,
-      frequency: parseInt(frequency, 10),
+      frequency: frequencyNum,
     };
 
-    addHabit(newHabit);
+    console.log("Creating habit:", newHabit);
+    await addHabit(newHabit);
 
     setHabitName("");
     setHabitDescription("");
     setFrequency("");
+
+    alert("Task added successfully!");
+    router.push("/");
   };
 
   return (
