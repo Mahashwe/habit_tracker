@@ -8,4 +8,4 @@ class Habit(models.Model):
     last_updated = models.DateField(auto_now=True)
 
     def __str__(self):
-        return self.habitName, self.habitDescription, self.frequency, self.done
+        return self.habitName

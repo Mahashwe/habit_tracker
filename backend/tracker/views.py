@@ -1,36 +1,37 @@
-from urllib import request
-
+from django.utils import timezone
 from rest_framework.viewsets import ModelViewSet
-from .models import Habit
-from .serializers import HabitSerializer
 from rest_framework.response import Response
 from rest_framework import status
+
+from .models import Habit
+from .serializers import HabitSerializer
+
 
 class HabitViewSet(ModelViewSet):
     queryset = Habit.objects.all()
     serializer_class = HabitSerializer
 
-    def create(self, request):
-        habitName = request.data.get('habitName')
-        habitDescription = request.data.get('habitDescription')
-        frequency = request.data.get('frequency')
-        done = request.data.get('done')
+    def create(self, request, *args, **kwargs):
+        habitName = request.data.get("habitName")
+        habitDescription = request.data.get("habitDescription")
+        frequency = request.data.get("frequency")
+        done = request.data.get("done", False)  # CHANGE 1: default done=False
 
         habit = Habit.objects.create(
             habitName=habitName,
             habitDescription=habitDescription,
             frequency=frequency,
-            done=done
+            done=done,
         )
         serializer = self.get_serializer(habit)
-        return Response(serializer.data)
-    
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
     def update(self, request, *args, **kwargs):
         habit = self.get_object()
-        habitName = request.data.get('habitName')
-        habitDescription = request.data.get('habitDescription')
-        frequency = request.data.get('frequency')
-        done = request.data.get('done')
+        habitName = request.data.get("habitName")
+        habitDescription = request.data.get("habitDescription")
+        frequency = request.data.get("frequency")
+        done = request.data.get("done")
 
         habit.habitName = habitName
         habit.habitDescription = habitDescription
@@ -40,18 +41,21 @@ class HabitViewSet(ModelViewSet):
 
         serializer = self.get_serializer(habit)
         return Response(serializer.data)
-    
+
     def destroy(self, request, *args, **kwargs):
         habit = self.get_object()
         habit.delete()
-        return Response({"message": "Habit deleted successfully"}, status=status.HTTP_200_OK)
-    
+        return Response(
+            {"message": "Habit deleted successfully"},
+            status=status.HTTP_200_OK,
+        )
+
 
 class TrackerViewSet(ModelViewSet):
     queryset = Habit.objects.all()
     serializer_class = HabitSerializer
 
-    def update(self, request, *args, **kwargs):
+    def partial_update(self, request, *args, **kwargs):  # CHANGE 2: handle PATCH
         habit = self.get_object()
         today = timezone.now().date()
 
@@ -64,4 +68,4 @@ class TrackerViewSet(ModelViewSet):
             habit.last_updated = today
 
         serializer.save(frequency=habit.frequency, last_updated=habit.last_updated)
-        return Response(serializer.data)  
+        return Response(serializer.data)
