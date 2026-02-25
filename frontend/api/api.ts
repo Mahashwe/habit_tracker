@@ -107,3 +107,8 @@ export const apiUpdateHabit = async (id: number, payload: CreateHabitPayload): P
 export const apiDeleteHabit = async (id: number): Promise<void> => {
   await api.delete(`${HABITS_PATH}${id}/`);
 };
+
+export const apiAskGemini = async (prompt: string): Promise<string> => {
+  const res = await api.post<{ answer: string }>("/tracker/ai/", { prompt });
+  return res.data.answer;
+};

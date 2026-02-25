@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.utils import timezone
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
@@ -5,7 +6,16 @@ from rest_framework import status
 
 from .models import Habit
 from .serializers import HabitSerializer
+import os
+from dotenv import load_dotenv
+import google.generativeai as genai
 
+from rest_framework.viewsets import ViewSet
+from rest_framework.response import Response
+
+load_dotenv()
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+model = genai.GenerativeModel("gemini-2.5-flash")
 
 class HabitViewSet(ModelViewSet):
     queryset = Habit.objects.all()
@@ -15,7 +25,7 @@ class HabitViewSet(ModelViewSet):
         habitName = request.data.get("habitName")
         habitDescription = request.data.get("habitDescription")
         frequency = request.data.get("frequency")
-        done = request.data.get("done", False)  # CHANGE 1: default done=False
+        done = request.data.get("done", False)  
 
         habit = Habit.objects.create(
             habitName=habitName,
@@ -71,3 +81,25 @@ class TrackerViewSet(ModelViewSet):
 
         serializer.save(frequency=habit.frequency, last_updated=habit.last_updated)
         return Response(serializer.data)
+
+class GeminiViewSet(ViewSet):
+
+     def create(self, request):
+        system_prompt = "You are a helpful AI habit assistant.\nAlways answer within the context of habits.\nBe clear and concise.\nLimit your response to 3-5 short sentences.\nIf you don't know the answer, say you don't know."
+        user_prompt = request.data.get("prompt")
+
+        if not user_prompt:
+            return Response({"error": "Prompt required"}, status=400)
+
+        try:
+            response = model.generate_content(
+                contents=[
+                    {"role": "user", "parts": [{"text": system_prompt}]},
+                    {"role": "user", "parts": [{"text": user_prompt}]},
+                ]
+            )
+
+            return Response({"answer": response.text})
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)

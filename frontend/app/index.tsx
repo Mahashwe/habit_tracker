@@ -84,6 +84,9 @@ export default function App() {
             ))
           )}
         </View>
+        <Pressable style={styles.aibutton} onPress={() => router.push("/ai")}>
+          <Text style={styles.buttonText}>Try AI Feature</Text>
+        </Pressable>
       </ScrollView>
     </SafeAreaView>
   );
@@ -195,5 +198,15 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 14,
     fontWeight: "bold",
+  },
+  aibutton: {
+    marginTop: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    backgroundColor: "rgb(155, 79, 242)",
+    borderRadius: 5,
+    marginLeft: "30%",
+    marginRight: "30%",
+    textAlign: "center",
   },
 });

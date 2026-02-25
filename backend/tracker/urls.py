@@ -5,6 +5,7 @@ from rest_framework import routers
 router = routers.DefaultRouter()
 router.register(r"habits", views.HabitViewSet)
 router.register(r"track", views.TrackerViewSet, basename="track")
+router.register(r"ai", views.GeminiViewSet, basename="ai")
 urlpatterns = [
     path("", include(router.urls)),
 ]
