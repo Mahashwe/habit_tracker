@@ -181,15 +181,15 @@ npm start
 
 ### Habits
 
-| Method | Endpoint                | Description                                          |
-| ------ | ----------------------- | ---------------------------------------------------- |
-| GET    | `/tracker/habits/`      | Retrieve all habits                                  |
-| POST   | `/tracker/habits/`      | Create a new habit                                   |
-| GET    | `/tracker/habits/{id}/` | Retrieve a specific habit                            |
-| PUT    | `/tracker/habits/{id}/` | Update a habit                                       |
-| DELETE | `/tracker/habits/{id}/` | Delete a habit                                       |
+| Method | Endpoint                | Description                                           |
+| ------ | ----------------------- | ----------------------------------------------------- |
+| GET    | `/tracker/habits/`      | Retrieve all habits                                   |
+| POST   | `/tracker/habits/`      | Create a new habit                                    |
+| GET    | `/tracker/habits/{id}/` | Retrieve a specific habit                             |
+| PUT    | `/tracker/habits/{id}/` | Update a habit                                        |
+| DELETE | `/tracker/habits/{id}/` | Delete a habit                                        |
 | PATCH  | `/tracker/track/{id}/`  | Mark habit as done/undone (auto-decrements frequency) |
-| POST   | `/tracker/ai/`          | Ask AI assistant about habits                        |
+| POST   | `/tracker/ai/`          | Ask AI assistant about habits                         |
 
 ### Request/Response Examples
 
