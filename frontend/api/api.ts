@@ -33,9 +33,7 @@ export type CreateHabitPayload = {
   done?: boolean;
 };
 
-// add_habit.tsx currently sends an `id` too; accept it and strip it.
 type CreateHabitPayloadLoose = CreateHabitPayload & { id?: number };
-
 const HABITS_PATH = "/tracker/habits/";
 const TRACK_PATH = "/tracker/track/";
 
